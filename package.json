@@ -1,6 +1,6 @@
 {
   "name": "deep-object-comparator",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Deep comparator between 2 nested JSON objects with a changelog as result",
   "main": "deepComparator.js",
   "scripts": {
