@@ -1,5 +1,4 @@
 # Deep Object Comparator 
-Feel free to contact me on github [https://github.com/DavideCometa](https://github.com/DavideCometa)
 
 The purpose of this package is to deeply compare two complex JSON objects (with nested objects or arrays) 
 and return a detailed changelog with deleted, added or updated keys (and their value).
