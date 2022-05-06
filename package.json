@@ -3,6 +3,7 @@
   "version": "1.0.8",
   "description": "Deep comparator between 2 nested JSON objects with a changelog as result",
   "main": "deepComparator.js",
+  "type":"module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
