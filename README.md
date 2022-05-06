@@ -45,9 +45,10 @@ let userData2 = {
 
 //calling
 
-	DeepCompare(userData1, userData2);
+	var changelog = DeepCompare(userData1, userData2);
+	console.log(changelog);
 	
-//will produce a result like this:
+//DeepCompare will produce a result like this:
 
 [
   {
