@@ -9,6 +9,10 @@ the a correct changelog).
 
 # Usage example:
 
+```js
+import DeepCompare from 'deep-object-comparator'
+```
+
 Let's suppose we have two complex JSON objects:
 ```js
 let userData1 = {
