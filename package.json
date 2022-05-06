@@ -1,0 +1,22 @@
+{
+  "name": "deep-object-comparator",
+  "version": "1.0.6",
+  "description": "Deep comparator between 2 nested JSON objects with a changelog as result",
+  "main": "deepComparator.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "DavideCometa",
+  "license": "ISC",
+  "keywords": [
+    "Recursion",
+    "DeepCompare",
+    "JSON",
+    "JSONChangelog",
+    "Objects diff",
+    "diff",
+    "comparator",
+    "equal",
+    "change-tracker"
+  ]
+}
