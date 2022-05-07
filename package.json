@@ -9,6 +9,11 @@
   },
   "author": "DavideCometa",
   "license": "ISC",
+  "homepage": "https://github.com/DavideCometa/Deep-Object-Compare",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavideCometa/Deep-Object-Compare"
+  },
   "keywords": [
     "Recursion",
     "DeepCompare",

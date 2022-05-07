@@ -5,7 +5,7 @@ and return a detailed changelog with deleted, added or updated keys (and their v
 It supports also format templates in order to produce cleaner changelogs.
 
 The only two mandatory parameters are the 2 objects (pass the older one before the newer in order to get
-the a correct changelog).
+a correct changelog).
 
 # Usage example:
 
@@ -20,7 +20,7 @@ let userData1 = {
 	"data" : {
 		"username": "testUser1",
 		"email": "testEmail@gmail.com",
-		"subscriptionDate": "01-02-2022"
+		"subscriptionDate": "01-02-2022",
 		"address" : {
 			"country": "Italy"
 		}
@@ -31,10 +31,10 @@ let userData1 = {
 let userData2 = {
 	"id": 213827,
 	"data" : {
-		"username": testUser1,
-		"email": newEmail@gmail.com
+		"username": "testUser1",
+		"email": "newEmail@gmail.com",
 		"address" : {
-			"country": Italy,
+			"country": "Italy",
 			"street": "Example street",
 		}
 	},
