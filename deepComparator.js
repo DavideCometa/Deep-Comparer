@@ -20,7 +20,7 @@ const ChangeState = {
 */
 
 
-export default  function DeepCompare (elem1, elem2, keyPath, keysToIgnore, formatTemplate) {
+var deepCompare = function (elem1, elem2, keyPath, keysToIgnore, formatTemplate) {
 
     let changes = [];
 
@@ -222,3 +222,5 @@ function deepArrayCompare(arr1, arr2, keyPath, keysToIgnore, reverseOrder, forma
 
     return diffs;
 }
+
+module.exports = deepCompare;

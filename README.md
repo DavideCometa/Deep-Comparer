@@ -10,7 +10,7 @@ a correct changelog).
 # Usage example:
 
 ```js
-import DeepCompare from 'deep-object-comparator'
+var deepCompare = require('deep-object-comparator')
 ```
 
 Let's suppose we have two complex JSON objects:
@@ -45,10 +45,10 @@ let userData2 = {
 
 //calling
 
-	var changelog = DeepCompare(userData1, userData2);
+	var changelog = deepCompare(userData1, userData2);
 	console.log(changelog);
 	
-//DeepCompare will produce a result like this:
+//deepCompare will produce a result like this:
 
 [
   {
