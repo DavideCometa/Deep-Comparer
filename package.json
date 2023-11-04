@@ -1,28 +1,38 @@
 {
-  "name": "deep-object-comparator",
-  "version": "1.0.13",
-  "description": "Deep comparator between 2 nested JSON objects with a changelog as result",
-  "main": "deepComparator.js",
-  "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "DavideCometa",
-  "license": "ISC",
-  "homepage": "https://github.com/DavideCometa/Deep-Object-Compare",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/DavideCometa/Deep-Object-Compare"
-  },
-  "keywords": [
-    "Recursion",
-    "DeepCompare",
-    "JSON",
-    "JSONChangelog",
-    "Objects diff",
-    "diff",
-    "comparator",
-    "equal",
-    "change-tracker"
-  ]
+	"name": "deep-comparer",
+	"version": "2.0.00",
+	"description": "Deep Comparer is a specialized utility crafted for performing meticulous comparisons between two complex elements (objects or arrays). These elements may contain nested structures including other objects and arrays.",
+	"main": "src/deep-comparer.js",
+	"type": "commonjs",
+	"scripts": {
+		"test": "NODE_ENV=test mocha './src/**/tests/*.js'",
+		"coverage": "nyc --reporter=html --reporter=text-summary npm run test"
+	},
+	"author": "DavideCometa",
+	"license": "ISC",
+	"homepage": "https://github.com/DavideCometa/Deep-Object-Compare",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/DavideCometa/Deep-Object-Compare"
+	},
+	"keywords": [
+		"Recursion",
+		"DeepComparer",
+		"JSON",
+		"JSONChangelog",
+		"Objects diff",
+		"diff",
+		"comparator",
+		"equal",
+		"change-tracker"
+	],
+	"devDependencies": {
+		"chai": "^4.3.10",
+		"eslint": "^8.53.0",
+		"eslint-config-prettier": "^9.0.0",
+		"eslint-plugin-prettier": "^5.0.1",
+		"mocha": "^10.2.0",
+		"nyc": "^15.1.0",
+		"prettier": "^3.0.3"
+	}
 }
