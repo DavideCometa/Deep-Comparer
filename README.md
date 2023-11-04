@@ -7,7 +7,7 @@ Deep Comparer is a specialized utility crafted for performing meticulous compari
 npm install deep-comparer
 ```
 
-# Usage example:
+## Usage example:
 
 Utilizing Deep Comparer is straightforward. The core function requires two arguments representing the elements to be compared. It is imperative to pass the older version as the first argument followed by the newer version to ensure the changelog reflects accurate changes.
 
