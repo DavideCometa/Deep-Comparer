@@ -20,6 +20,56 @@ describe('deep-comparator', () => {
 				}
 			);
 		});
+
+		it('should throw an error when comparing functions in arrays', async () => {
+			const prior = {
+				key1: {
+					subKey1: [() => {}],
+				},
+			};
+			const latest = {
+				key1: {
+					subKey1: ['function () {}'],
+				},
+			};
+
+			const deepCompare = createDeepComparer();
+			await assert.rejects(
+				async () => {
+					await deepCompare(prior, latest);
+				},
+				(err) => {
+					assert(err instanceof Error);
+					assert.strictEqual(err.message, 'Function found at root.key1.subKey1[0]');
+					return true;
+				}
+			);
+		});
+
+		it('should throw an error when comparing functions in objects', async () => {
+			const prior = {
+				key1: {
+					subKey1: () => {},
+				},
+			};
+			const latest = {
+				key1: {
+					subKey1: '() => {}',
+				},
+			};
+
+			const deepCompare = createDeepComparer();
+			await assert.rejects(
+				async () => {
+					await deepCompare(prior, latest);
+				},
+				(err) => {
+					assert(err instanceof Error);
+					assert.strictEqual(err.message, 'Function found at root.key1.subKey1');
+					return true;
+				}
+			);
+		});
 	});
 
 	describe('Primitive Types', () => {

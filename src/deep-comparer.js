@@ -2,6 +2,7 @@ const performanceLogger = require('./utils/performance-logger');
 const { hashCompare } = require('./utils/hash-compare');
 const { DiffType, DEFAULT_ROOT } = require('./constants');
 const { getChangelog } = require('./utils/get-changelog');
+const Helper = require('./utils/helper');
 
 /**
  * @author: davic. Github: https://github.com/DavideCometa
@@ -15,7 +16,7 @@ const { getChangelog } = require('./utils/get-changelog');
  * @example
  * const deepCompare = createDeepComparer(['keyToIgnore'], ['keyToHide']);
  * const diffs = await deepCompare({ a: 1, b: 2 }, { a: 1, b: 3 });
- * console.log(diffs); //
+ * console.log(diffs);
  */
 function createDeepComparer(keysToIgnore, keysToFilter) {
 	/**
@@ -34,48 +35,23 @@ function createDeepComparer(keysToIgnore, keysToFilter) {
 
 			const currentPath = `${path}.${key}`;
 			const diffs = [];
+			const latestVal = latest[key];
 
-			if (latest[key] == null) {
+			if (typeof value === 'function' || typeof latestVal === 'function') {
+				throw new Error(`Function found at ${currentPath}`);
+			}
+
+			if (latestVal == null) {
 				diffs.push(
 					getChangelog(value, undefined, currentPath, DiffType.Deleted, keysToFilter)
 				);
-			} else if (Array.isArray(value)) {
-				if (Array.isArray(latest[key])) {
-					diffs.push(...(await deepArrayCompare(value, latest[key], currentPath)));
-				} else {
-					diffs.push(
-						getChangelog(
-							value,
-							latest[key],
-							currentPath,
-							DiffType.Updated,
-							keysToFilter
-						)
-					);
-				}
-			} else if (value != null && typeof value === 'object') {
-				if (latest[key] != null && typeof latest[key] === 'object') {
-					diffs.push(...(await deepObjectCompare(value, latest[key], currentPath)));
-				} else {
-					diffs.push(
-						getChangelog(
-							value,
-							latest[key],
-							currentPath,
-							DiffType.Updated,
-							keysToFilter
-						)
-					);
-				}
-			} else if (value !== latest[key]) {
+			} else if (Helper.areBothArrays(value, latestVal)) {
+				diffs.push(...(await deepArrayCompare(value, latestVal, currentPath)));
+			} else if (Helper.areBothObjects(value, latestVal)) {
+				diffs.push(...(await deepObjectCompare(value, latestVal, currentPath)));
+			} else if (value !== latestVal) {
 				diffs.push(
-					getChangelog(
-						value,
-						latest[key],
-						currentPath,
-						DiffType.Updated,
-						keysToFilter
-					)
+					getChangelog(value, latestVal, currentPath, DiffType.Updated, keysToFilter)
 				);
 			}
 
@@ -85,6 +61,7 @@ function createDeepComparer(keysToIgnore, keysToFilter) {
 		const nestedDiffs = await Promise.all(comparePromises);
 		const flattenedDiffs = nestedDiffs.flat();
 
+		// Check for newly added keys
 		return Object.entries(latest).reduce((diffs, [key, value]) => {
 			if (!Object.prototype.hasOwnProperty.call(prior, key)) {
 				const currentPath = `${path}.${key}`;
@@ -107,57 +84,26 @@ function createDeepComparer(keysToIgnore, keysToFilter) {
 	async function deepArrayCompare(prior, latest, path) {
 		if (hashCompare(prior, latest)) return [];
 
-		const comparePromises = prior.map(async (currElem, i) => {
+		const comparePromises = prior.map(async (elem, i) => {
 			const currentPath = `${path}[${i}]`;
 			const diffs = [];
+			const latestElem = latest[i];
+
+			if (typeof elem === 'function' || typeof latestElem === 'function') {
+				throw new Error(`Function found at ${currentPath}`);
+			}
 
 			if (latest.length <= i) {
 				diffs.push(
-					getChangelog(
-						currElem,
-						undefined,
-						currentPath,
-						DiffType.Deleted,
-						keysToFilter
-					)
+					getChangelog(elem, undefined, currentPath, DiffType.Deleted, keysToFilter)
 				);
-			} else if (Array.isArray(currElem)) {
-				if (Array.isArray(latest[i])) {
-					diffs.push(...(await deepArrayCompare(currElem, latest[i], currentPath)));
-				} else {
-					diffs.push(
-						getChangelog(
-							currElem,
-							latest[i],
-							currentPath,
-							DiffType.Updated,
-							keysToFilter
-						)
-					);
-				}
-			} else if (typeof currElem === 'object') {
-				if (typeof latest[i] === 'object') {
-					diffs.push(...(await deepObjectCompare(currElem, latest[i], currentPath)));
-				} else {
-					diffs.push(
-						getChangelog(
-							currElem,
-							latest[i],
-							currentPath,
-							DiffType.Updated,
-							keysToFilter
-						)
-					);
-				}
-			} else if (currElem !== latest[i]) {
+			} else if (Helper.areBothArrays(elem, latestElem)) {
+				diffs.push(...(await deepArrayCompare(elem, latestElem, currentPath)));
+			} else if (Helper.areBothObjects(elem, latestElem)) {
+				diffs.push(...(await deepObjectCompare(elem, latestElem, currentPath)));
+			} else if (elem !== latestElem) {
 				diffs.push(
-					getChangelog(
-						currElem,
-						latest[i],
-						currentPath,
-						DiffType.Updated,
-						keysToFilter
-					)
+					getChangelog(elem, latestElem, currentPath, DiffType.Updated, keysToFilter)
 				);
 			}
 
@@ -167,15 +113,11 @@ function createDeepComparer(keysToIgnore, keysToFilter) {
 		const nestedDiffs = await Promise.all(comparePromises);
 		const flattenedDiffs = nestedDiffs.flat();
 
-		return latest.slice(prior.length).reduce((diffs, currElem, i) => {
+		// Check for newly added elements
+		return latest.slice(prior.length).reduce((diffs, elem, i) => {
+			const currPath = `${path}[${i + prior.length}]`;
 			diffs.push(
-				getChangelog(
-					currElem,
-					undefined,
-					`${path}[${i + prior.length}]`,
-					DiffType.Added,
-					keysToFilter
-				)
+				getChangelog(elem, undefined, currPath, DiffType.Added, keysToFilter)
 			);
 			return diffs;
 		}, flattenedDiffs);
@@ -184,45 +126,32 @@ function createDeepComparer(keysToIgnore, keysToFilter) {
 	/**
 	 * Deeply compares two versions of an object or array and returns a detailed changelog.
 	 *
-	 * @param {Object|Array} priorVersion - The original or older version.
-	 * @param {Object|Array} latestVersion - The updated version.
+	 * @param {Object|Array} prior - The original or older version.
+	 * @param {Object|Array} latest - The updated version.
 	 * @param {string} [path='root'] - The starting path to report changelogs.
 	 * @returns {Object[]} An array of diffs between the two versions.
 	 *
-	 * @throws {Error} If either `priorVersion` or `latestVersion` is null or undefined.
+	 * @throws {Error} If either `prior` or `latest` is null or undefined.
 	 */
-	return async function deepCompare(
-		priorVersion,
-		latestVersion,
-		root = DEFAULT_ROOT
-	) {
+	return async function deepCompare(prior, latest, root = DEFAULT_ROOT) {
 		const startTime = process.hrtime();
 		const diffs = [];
 
-		if (!priorVersion || !latestVersion)
+		if (!prior || !latest)
 			throw new Error(
 				'Two non-null versions must be provided for the deep compare.'
 			);
 
-		// Compute hashes for both versions, if they equal so no further compare
-		if (hashCompare(priorVersion, latestVersion)) return [];
+		// Compute hashes for both versions, if they equal no further compare
+		if (hashCompare(prior, latest)) return [];
 
-		if (Array.isArray(priorVersion) && Array.isArray(latestVersion)) {
-			diffs.push(...(await deepArrayCompare(priorVersion, latestVersion, root)));
-		} else if (
-			typeof priorVersion === 'object' &&
-			typeof latestVersion === 'object'
-		) {
-			diffs.push(...(await deepObjectCompare(priorVersion, latestVersion, root)));
+		if (Helper.areBothArrays(prior, latest)) {
+			diffs.push(...(await deepArrayCompare(prior, latest, root)));
+		} else if (Helper.areBothObjects(prior, latest)) {
+			diffs.push(...(await deepObjectCompare(prior, latest, root)));
 		} else {
 			diffs.push(
-				getChangelog(
-					priorVersion,
-					latestVersion,
-					root,
-					DiffType.Updated,
-					keysToFilter
-				)
+				getChangelog(prior, latest, root, DiffType.Updated, keysToFilter)
 			);
 		}
 
