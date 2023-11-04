@@ -1,7 +1,5 @@
 # Deep Comparer
 
-## Overview
-
 Deep Comparer is a specialized utility crafted for performing meticulous comparisons between two complex elements (objects or arrays). These elements may contain nested structures including other objects and arrays. The output of the comparison is a detailed changelog that pinpoints all the modifications, enumerating the keys that have been added, updated, or deleted, alongside their respective values.
 
 ## Installation 
