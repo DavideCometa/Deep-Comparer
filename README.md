@@ -7,7 +7,7 @@ Deep Comparer is a specialized utility crafted for performing meticulous compari
 npm install deep-comparer
 ```
 
-# Usage example:
+## Usage example:
 
 Utilizing Deep Comparer is straightforward. The core function requires two arguments representing the elements to be compared. It is imperative to pass the older version as the first argument followed by the newer version to ensure the changelog reflects accurate changes.
 
@@ -18,7 +18,7 @@ const olderVersion = {...};  // Your older JSON object
 const newerVersion = {...};  // Your newer JSON object
 
 const deepCompare = createDeepComparer();
-const changelog = await deepCompare(olderVersion, newerVersion);
+const changelog = await deepCompare(olderVersion, newerVersion); // it can take an optional parameter root
 
 console.log(changelog);
 ```
@@ -66,22 +66,26 @@ deepCompare will produce a result like the following:
 ```js
 [
   {
-    keyPath: 'data -> email',
+    path: 'root.data.email',
     oldVal: 'testEmail@gmail.com',
     newVal: 'newEmail@gmail.com',
     note: 'UPDATED',
   },
   {
-    keyPath: 'data -> subscriptionDate',
+    path: 'root.data.subscriptionDate',
     oldVal: '01-02-2022',
     note: 'DELETED',
   },
   {
-    keyPath: 'data -> address -> street',
+    path: 'root.data.address.street',
     newVal: 'Example street',
     note: 'ADDED',
   },
-  { keyPath: 'someArrayProperties.5', newVal: 657, note: 'ADDED' },
+  { 
+    path: 'root.someArrayProperties[5]', 
+    newVal: 657, 
+    note: 'ADDED' 
+  },
 ];
 ```
 
