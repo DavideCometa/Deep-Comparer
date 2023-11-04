@@ -18,7 +18,7 @@ const olderVersion = {...};  // Your older JSON object
 const newerVersion = {...};  // Your newer JSON object
 
 const deepCompare = createDeepComparer();
-const changelog = await deepCompare(olderVersion, newerVersion);
+const changelog = await deepCompare(olderVersion, newerVersion); // it can take an optional parameter root
 
 console.log(changelog);
 ```
@@ -66,22 +66,26 @@ deepCompare will produce a result like the following:
 ```js
 [
   {
-    keyPath: 'data -> email',
+    path: 'root.data.email',
     oldVal: 'testEmail@gmail.com',
     newVal: 'newEmail@gmail.com',
     note: 'UPDATED',
   },
   {
-    keyPath: 'data -> subscriptionDate',
+    path: 'root.data.subscriptionDate',
     oldVal: '01-02-2022',
     note: 'DELETED',
   },
   {
-    keyPath: 'data -> address -> street',
+    path: 'root.data.address.street',
     newVal: 'Example street',
     note: 'ADDED',
   },
-  { keyPath: 'someArrayProperties.5', newVal: 657, note: 'ADDED' },
+  { 
+    path: 'root.someArrayProperties[5]', 
+    newVal: 657, 
+    note: 'ADDED' 
+  },
 ];
 ```
 
