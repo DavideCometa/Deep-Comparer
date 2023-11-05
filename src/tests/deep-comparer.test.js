@@ -218,6 +218,23 @@ describe('deep-comparator', () => {
 			const deepCompare = createDeepComparer();
 			assert.deepStrictEqual(await deepCompare(elem1, elem2), expected);
 		});
+
+		it('should detect changes in objects with Date instances', async () => {
+			const date1 = new Date(2020, 0, 1);
+			const date2 = new Date(2021, 0, 1);
+			const elem1 = { a: 1, b: date1 };
+			const elem2 = { a: 1, b: date2 };
+			const expected = [
+				{
+					path: 'root.b',
+					oldVal: date1,
+					newVal: date2,
+					note: DiffType.Updated.description,
+				},
+			];
+			const deepCompare = createDeepComparer();
+			assert.deepStrictEqual(await deepCompare(elem1, elem2), expected);
+		});
 	});
 
 	describe('Complex Objects', () => {

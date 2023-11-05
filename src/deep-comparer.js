@@ -20,42 +20,64 @@ const Helper = require('./utils/helper');
  */
 function createDeepComparer(keysToIgnore, keysToFilter) {
 	/**
+	 * Compares two values of any type and generates a changelog if they differ. It specifically handles
+	 * Date objects by comparing their time values, arrays and objects by performing deep comparisons, and
+	 * other value types by direct comparison. If a difference is detected, a changelog entry is created.
+	 *
+	 * @async
+	 * @function compareValues
+	 * @param {*} value1 - The first value to be compared.
+	 * @param {*} value2 - The second value to be compared.
+	 * @param {string} path - The path to the current value in the object, used for changelog entries.
+	 * @returns {Promise<Object[]>} A promise that resolves to an array containing the changelog entry if a difference is found, otherwise an empty array.
+	 */
+	async function compareValues(value1, value2, path) {
+		if (typeof value1 === 'function' || typeof value2 === 'function') {
+			throw new Error(`Function found at ${path}`);
+		}
+
+		if (value2 == null) {
+			return [
+				getChangelog(value1, undefined, path, DiffType.Deleted, keysToFilter),
+			];
+		}
+
+		if (
+			Helper.areBothDates(value1, value2) &&
+			value1.getTime() !== value2.getTime()
+		) {
+			return [getChangelog(value1, value2, path, DiffType.Updated, keysToFilter)];
+		} else if (Helper.areBothArrays(value1, value2)) {
+			return await deepArrayCompare(value1, value2, path);
+		} else if (Helper.areBothObjects(value1, value2)) {
+			return await deepObjectCompare(value1, value2, path);
+		} else if (value1 !== value2) {
+			return [getChangelog(value1, value2, path, DiffType.Updated, keysToFilter)];
+		}
+		return [];
+	}
+
+	/**
 	 * Recursively compares two elements and returns a detailed changelog.
 	 *
-	 * @param {Object} prior - The original data.
-	 * @param {Object} latest - The updated data.
-	 * @param {string} path - The current path being compared.
-	 * @returns {Object[]} An array of diffs between the two.
+	 * @async
+	 * @function deepObjectCompare
+	 * @param {Object} prior - The original object to compare from.
+	 * @param {Object} latest - The new object to compare to.
+	 * @param {string} path - The base path for the current comparison, used for changelog entries.
+	 * @returns {Promise<Object[]>} A promise that resolves to an array of changelog entries detailing the differences.
+	 * @throws {Error} If a function is encountered in either the `prior` or `latest` objects, since functions cannot be compared.
 	 */
 	async function deepObjectCompare(prior, latest, path) {
 		if (hashCompare(prior, latest)) return [];
 
-		const comparePromises = Object.entries(prior).map(async ([key, value]) => {
+		const comparePromises = Object.entries(prior).map(async ([key, val]) => {
 			if (keysToIgnore && keysToIgnore.includes(key)) return [];
 
 			const currentPath = `${path}.${key}`;
-			const diffs = [];
 			const latestVal = latest[key];
 
-			if (typeof value === 'function' || typeof latestVal === 'function') {
-				throw new Error(`Function found at ${currentPath}`);
-			}
-
-			if (latestVal == null) {
-				diffs.push(
-					getChangelog(value, undefined, currentPath, DiffType.Deleted, keysToFilter)
-				);
-			} else if (Helper.areBothArrays(value, latestVal)) {
-				diffs.push(...(await deepArrayCompare(value, latestVal, currentPath)));
-			} else if (Helper.areBothObjects(value, latestVal)) {
-				diffs.push(...(await deepObjectCompare(value, latestVal, currentPath)));
-			} else if (value !== latestVal) {
-				diffs.push(
-					getChangelog(value, latestVal, currentPath, DiffType.Updated, keysToFilter)
-				);
-			}
-
-			return diffs;
+			return await compareValues(val, latestVal, currentPath);
 		});
 
 		const nestedDiffs = await Promise.all(comparePromises);
@@ -76,38 +98,22 @@ function createDeepComparer(keysToIgnore, keysToFilter) {
 	/**
 	 * Recursively compares two arrays and returns a detailed changelog.
 	 *
-	 * @param {Array} prior - The original array.
-	 * @param {Array} latest - The updated array.
-	 * @param {string} path - The current path being compared.
-	 * @returns {Object[]} An array of diffs between the two.
+	 * @async
+	 * @function deepArrayCompare
+	 * @param {Array} prior - The original array to compare from.
+	 * @param {Array} latest - The new array to compare to.
+	 * @param {string} path - The base path for the current comparison, used for changelog entries.
+	 * @returns {Promise<Object[]>} A promise that resolves to an array of changelog entries detailing the differences.
+	 * @throws {Error} If a function is encountered in any array element, since functions cannot be compared.
 	 */
 	async function deepArrayCompare(prior, latest, path) {
 		if (hashCompare(prior, latest)) return [];
 
 		const comparePromises = prior.map(async (elem, i) => {
 			const currentPath = `${path}[${i}]`;
-			const diffs = [];
 			const latestElem = latest[i];
 
-			if (typeof elem === 'function' || typeof latestElem === 'function') {
-				throw new Error(`Function found at ${currentPath}`);
-			}
-
-			if (latest.length <= i) {
-				diffs.push(
-					getChangelog(elem, undefined, currentPath, DiffType.Deleted, keysToFilter)
-				);
-			} else if (Helper.areBothArrays(elem, latestElem)) {
-				diffs.push(...(await deepArrayCompare(elem, latestElem, currentPath)));
-			} else if (Helper.areBothObjects(elem, latestElem)) {
-				diffs.push(...(await deepObjectCompare(elem, latestElem, currentPath)));
-			} else if (elem !== latestElem) {
-				diffs.push(
-					getChangelog(elem, latestElem, currentPath, DiffType.Updated, keysToFilter)
-				);
-			}
-
-			return diffs;
+			return await compareValues(elem, latestElem, currentPath);
 		});
 
 		const nestedDiffs = await Promise.all(comparePromises);

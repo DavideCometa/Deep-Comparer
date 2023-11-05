@@ -10,6 +10,10 @@ const Helper = {
 	areBothObjects: function (val1, val2) {
 		return this.isObject(val1) && this.isObject(val2);
 	},
+
+	areBothDates: function (val1, val2) {
+		return val1 instanceof Date && val2 instanceof Date;
+	},
 };
 
 module.exports = Helper;
