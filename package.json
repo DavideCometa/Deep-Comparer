@@ -1,6 +1,6 @@
 {
 	"name": "deep-comparer",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"description": "Deep Comparer is a specialized utility crafted for performing meticulous comparisons between two complex elements (objects or arrays). These elements may contain nested structures including other objects and arrays.",
 	"main": "src/deep-comparer.js",
 	"type": "commonjs",
